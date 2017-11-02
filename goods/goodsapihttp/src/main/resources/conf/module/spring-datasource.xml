@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/tx
+		http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<bean id="mySqlDataSource" class="org.apache.commons.dbcp.BasicDataSource"   destroy-method="close">
+		<property name="driverClassName" value="${jdbc.mysql.driver}" />
+		<property name="url" value="${jdbc.mysql.url}" />
+		<property name="username" value="${jdbc.mysql.username}" />
+		<property name="password" value="${jdbc.mysql.password}" />
+		
+		<property name="initialSize" value="${commonDbcp.initialSize}"/>
+        <property name="maxActive" value="${commonDbcp.maxActive}"/>
+        <property name="maxIdle" value="${commonDbcp.maxIdle}"/>
+        <property name="minIdle" value="${commonDbcp.minIdle}"/>
+        <!-- dbcp validate配置 -->
+        <property name="validationQuery" value="${commonDbcp.validationQuery}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${commonDbcp.timeBetweenEvictionRunsMillis}"/>
+        <property name="minEvictableIdleTimeMillis" value="${commonDbcp.minEvictableIdleTimeMillis}"/>
+        <property name="numTestsPerEvictionRun" value="${commonDbcp.numTestsPerEvictionRun}"/>
+        <property name="testWhileIdle" value="${commonDbcp.testWhileIdle}"/>
+        <property name="testOnBorrow" value="${commonDbcp.testOnBorrow}"/>
+        <property name="testOnReturn" value="${commonDbcp.testOnReturn}"/>
+	</bean>
+	<bean id="readOnlyMySqlDataSource" class="org.apache.commons.dbcp.BasicDataSource"   destroy-method="close">
+		<property name="driverClassName" value="${jdbc.readonlymysql.driver}" />
+		<property name="url" value="${jdbc.readonlymysql.url}" />
+		<property name="username" value="${jdbc.readonlymysql.username}" />
+		<property name="password" value="${jdbc.readonlymysql.password}" />
+		
+		<property name="initialSize" value="${commonDbcp.initialSize}"/>
+        <property name="maxActive" value="${commonDbcp.maxActive}"/>
+        <property name="maxIdle" value="${commonDbcp.maxIdle}"/>
+        <property name="minIdle" value="${commonDbcp.minIdle}"/>
+        <!-- dbcp validate配置 -->
+        <property name="validationQuery" value="${commonDbcp.validationQuery}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${commonDbcp.timeBetweenEvictionRunsMillis}"/>
+        <property name="minEvictableIdleTimeMillis" value="${commonDbcp.minEvictableIdleTimeMillis}"/>
+        <property name="numTestsPerEvictionRun" value="${commonDbcp.numTestsPerEvictionRun}"/>
+        <property name="testWhileIdle" value="${commonDbcp.testWhileIdle}"/>
+        <property name="testOnBorrow" value="${commonDbcp.testOnBorrow}"/>
+        <property name="testOnReturn" value="${commonDbcp.testOnReturn}"/>
+	</bean>
+
+	<bean id="mySqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dynamicDataSource"/>
+		<property name="mapperLocations" value="classpath:mybatis/*.xml" />
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageHelper">
+					<property name="properties">
+						<value>
+							dialect=hsqldb
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+
+	<bean id="dynamicDataSource" class="com.zhtx.goodsapi.common.DynamicDataSource">
+		<!-- 通过key-value关联数据源 -->
+		<property name="targetDataSources">
+			<map>
+				<entry value-ref="mySqlDataSource" key="Master"></entry>
+				<entry value-ref="readOnlyMySqlDataSource" key="Slave"></entry>
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="mySqlDataSource" />
+	</bean>
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dynamicDataSource" />
+	</bean>
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.zhtx.goodsapi.dao"/>
+	</bean>
+
+	<bean id="dataSourceAspect" class="com.zhtx.goodsapi.common.DataSourceAspect"/>
+	<aop:config>
+		<aop:aspect ref="dataSourceAspect">
+			<!-- 拦截所有service方法 -->
+			<aop:pointcut id="dataSourcePointcut" expression="execution(* com.zhtx.goodsapi.dao.*.*(..))"/>
+			<aop:before pointcut-ref="dataSourcePointcut" method="before" />
+			<aop:after pointcut-ref="dataSourcePointcut" method="after"/>
+		</aop:aspect>
+	</aop:config>
+</beans>

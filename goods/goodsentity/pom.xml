@@ -1,0 +1,40 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>goods</groupId>
+        <artifactId>goods</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>goodsentity</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>goodsentity</name>
+    <url>http://maven.apache.org</url>
+    <!--<dependencies> -->
+    <!--<dependency> -->
+    <!--<groupId>tools</groupId> -->
+    <!--<artifactId>zbscore</artifactId> -->
+    <!--<version>0.0.1-SNAPSHOT</version> -->
+    <!--</dependency> -->
+    <!--<dependency> -->
+    <!--<groupId>org.mongodb</groupId> -->
+    <!--<artifactId>mongo-java-driver</artifactId> -->
+    <!--</dependency> -->
+    <!--</dependencies> -->
+    <dependencies>
+        <dependency>
+            <groupId>goods</groupId>
+            <artifactId>goodscore</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.wordnik</groupId>
+            <artifactId>swagger-jaxrs_2.10</artifactId>
+        </dependency>
+    </dependencies>
+</project>
